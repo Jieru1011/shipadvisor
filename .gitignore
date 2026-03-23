@@ -1,7 +1,8 @@
-﻿shipadvisor_images/
-sample_images/
+﻿sample_images/
 sample_ocr/
 trial_output/
 *.npz
 __pycache__/
 .streamlit/
+.venv/
+*.tar.gz
