@@ -8,6 +8,7 @@ import pandas as pd
 import os, json
 import plotly.graph_objects as go
 import plotly.express as px
+import streamlit.components.v1 as components
 
 RESULTS_DIR = './shipadvisor_results'
 ROUTES_FILE = os.path.join(RESULTS_DIR, 'routes.csv')
@@ -24,32 +25,29 @@ IMAGE_DIRS = ['./shipadvisor_images', './travelogues_raw']
 # mentions Italy in passing should not show up under "Italy").
 # ============================================================
 PLACE_SUBJECT_KEYWORDS = {
-    # Based on include_terms from the pipeline and actual <plaats> values
-    # in mediterranean_books.csv Subject field (Dutch library catalogue)
     'Italy':     ['italië'],
     'France':    ['frankrijk'],
     'Spain':     ['spanje'],
     'Portugal':  ['portugal'],
-    'Greece':    [],                  # no books with Greece as primary Subject
+    'Greece':    [],
     'Turkey':    ['turkije'],
     'Egypt':     ['egypte'],
     'Palestine': ['palestina'],
     'Syria':     ['syrië'],
-    'Lebanon':   [],                  # no books with Lebanon as primary Subject
+    'Lebanon':   [],
     'Algeria':   ['algerije', 'noord-afrikaanse staten', 'maghreb'],
     'Tunisia':   ['tunesi', 'noord-afrikaanse staten', 'maghreb'],
     'Morocco':   ['marokko', 'noord-afrikaanse staten', 'maghreb'],
     'Libya':     ['libië', 'noord-afrikaanse staten', 'maghreb'],
-    'Cyprus':    [],                  # no books with Cyprus as primary Subject
-    'Malta':     [],                  # no books with Malta as primary Subject
-    'Croatia':   [],                  # no books with Croatia as primary Subject
-    # Non-Mediterranean places that appear in route matching
+    'Cyprus':    [],
+    'Malta':     [],
+    'Croatia':   [],
     'Russia':    ['rusland'],
     'India':     ['india', 'azië'],
     'China':     ['china', 'azië'],
     'Persia':    ['perzië'],
-    'England':   [],                  # transit country, no specific Subject
-    'Belgium':   [],                  # departure country
+    'England':   [],
+    'Belgium':   [],
     'Netherlands': [],
     'Germany':   [],
     'Austria':   [],
@@ -112,8 +110,6 @@ h1,h2,h3 {{ font-family:'Playfair Display',serif!important; color:{C['ink']}!imp
 def load_data():
     r = pd.read_csv(ROUTES_FILE) if os.path.exists(ROUTES_FILE) else None
     i = pd.read_csv(ILLUSTRATIONS_FILE) if os.path.exists(ILLUSTRATIONS_FILE) else None
-    # Skip classifications.csv — too large (84k rows), causes OOM.
-    # Statistics tab will derive stats from route_illustrations instead.
     c = None
     b = pd.read_csv(BOOKS_FILE) if os.path.exists(BOOKS_FILE) else None
     return r, i, c, b
@@ -137,12 +133,12 @@ def ie_matches_place(ie_folder, place, ie_subject_map):
     """Check if a book's Subject field mentions the given place."""
     keywords = PLACE_SUBJECT_KEYWORDS.get(place)
     if keywords is None:
-        return True  # place not in mapping → don't filter
+        return True
     if len(keywords) == 0:
-        return True  # no dedicated books exist for this place → keep all
+        return True
     subj = ie_subject_map.get(ie_folder, '')
     if not subj:
-        return True  # no Subject data → keep (safe default)
+        return True
     return any(kw in subj for kw in keywords)
 
 def find_image(p):
@@ -261,7 +257,7 @@ def main():
     if 'sel' not in st.session_state:
         st.session_state.sel = None
 
-    tab1, tab2, tab3 = st.tabs(["Statistics", "Browse Illustrations", "Route Explorer"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Statistics", "Browse Illustrations", "Route Explorer", "Sentiment Map"])
 
     # ================================================================
     # TAB 3: ROUTE EXPLORER
@@ -419,7 +415,6 @@ def main():
                 med_vis = med_vis[med_vis['illustration_type'] == sel_type]
             if sel_place != 'All locations':
                 med_vis = med_vis[med_vis['nearest_place'] == sel_place]
-                # Apply Subject-based filtering when strict mode is on
                 if strict_filter and sel_place in PLACE_SUBJECT_KEYWORDS:
                     kws = PLACE_SUBJECT_KEYWORDS[sel_place]
                     if len(kws) == 0:
@@ -470,7 +465,6 @@ def main():
     with tab1:
         st.markdown("### Dataset Statistics")
 
-        # Filter to only real illustrations (exclude frontispice, title_page, etc.)
         if illustrations is not None:
             vis_only = illustrations[illustrations['illustration_type'].isin(VISUAL_TYPES)].copy()
         else:
@@ -539,6 +533,24 @@ def main():
                            labels={'num_med_stops': 'Mediterranean stops', 'count': 'Routes'})
         fig.update_layout(**base_layout(height=350, showlegend=False))
         st.plotly_chart(fig, use_container_width=True)
+
+    # ================================================================
+    # TAB 4: SENTIMENT MAP
+    # ================================================================
+    with tab4:
+        st.markdown("### Mediterranean Sentiment Map")
+        st.markdown(
+            f'<p style="font-family:EB Garamond,serif;color:{C["ink_light"]};font-style:italic">'
+            f'Sentiment analysis of Mediterranean locations based on travelogue texts</p>',
+            unsafe_allow_html=True
+        )
+        map_path = "mediterranean_sentiment_map_offline.html"
+        if os.path.exists(map_path):
+            with open(map_path, "r", encoding="utf-8") as f:
+                map_html = f.read()
+            components.html(map_html, height=700, scrolling=True)
+        else:
+            st.warning("Sentiment map file not found. Please place `mediterranean_sentiment_map_offline.html` in the app root directory.")
 
 
 if __name__ == "__main__":
