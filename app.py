@@ -234,9 +234,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
 </div>
 <script>
 function enterApp(){
-  var url=new URL(window.parent.location);
-  url.searchParams.set('entered','true');
-  window.parent.location.href=url.toString();
+  // Try multiple methods to communicate with Streamlit
+  try { window.parent.postMessage({type:'streamlit:setComponentValue', value:true}, '*'); } catch(e){}
+  try {
+    // Find and click the hidden Streamlit button
+    var btns = window.parent.document.querySelectorAll('button');
+    for(var i=0;i<btns.length;i++){
+      if(btns[i].innerText.indexOf('ENTER_SHIP')!==-1){ btns[i].click(); return; }
+    }
+  } catch(e){}
+  // Last resort: direct URL change
+  try { window.parent.location.search='?entered=true'; } catch(e){}
 }
 </script>
 """.replace("LOGO_PLACEHOLDER", logo_tag)
@@ -252,10 +260,25 @@ function enterApp(){
     section[data-testid="stSidebar"]{display:none!important}
     .stApp{background:#1b3a4b!important}
     iframe{border:none!important}
+    /* Hide the secret enter button but keep it clickable */
+    .secret-enter { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999; opacity:0.01; }
+    .secret-enter button {
+        background:#1b3a4b!important; border:1px solid rgba(197,153,62,0.3)!important;
+        color:#c5993e!important; padding:10px 30px!important; font-size:0.8rem!important;
+        letter-spacing:2px!important; cursor:pointer!important;
+    }
+    .secret-enter button:hover { opacity:1!important; background:transparent!important; }
     </style>
     """, unsafe_allow_html=True)
 
     components.html(landing_html, height=900, scrolling=False)
+
+    # Hidden but functional Streamlit button as fallback
+    st.markdown('<div class="secret-enter">', unsafe_allow_html=True)
+    if st.button("ENTER_SHIP"):
+        st.session_state.entered = True
+        st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ============================================================
@@ -484,6 +507,11 @@ def show_app():
 # ROUTING
 # ============================================================
 def main():
+    # Detect click from landing HTML button (sets ?entered=true)
+    params = st.query_params
+    if params.get('entered') == 'true':
+        st.session_state.entered = True
+
     if not st.session_state.entered:
         show_landing()
     else:
