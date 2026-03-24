@@ -79,8 +79,15 @@ if 'sel' not in st.session_state:
 # LOGO HELPER
 # ============================================================
 def get_logo_base64():
-    for p in ['./logo.png', './shipadvisor_results/logo.png', './assets/logo.png']:
-        if os.path.exists(p):
+    import glob
+    # Search common locations
+    candidates = ['./logo.png', './Logo.png', './LOGO.png',
+                  './shipadvisor_results/logo.png', './assets/logo.png',
+                  './images/logo.png']
+    # Also search for any png with 'logo' in name
+    candidates += glob.glob('./*logo*.*') + glob.glob('./*Logo*.*') + glob.glob('./*LOGO*.*')
+    for p in candidates:
+        if os.path.exists(p) and p.lower().endswith(('.png', '.jpg', '.jpeg')):
             with open(p, 'rb') as f:
                 return base64.b64encode(f.read()).decode()
     return None
@@ -222,18 +229,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
       <div class="stt"><div class="sn">700+</div><div class="sl">Illustrations</div></div>
     </div>
     <div class="orn"><span class="ln"></span><span class="dm"></span><span class="ln"></span></div>
-    <button class="eb" onclick="enterApp()"><span>Embark on the Voyage</span><span class="ar">&rarr;</span></button>
   </div>
 </div>
-<script>
-function enterApp(){
-  var url=new URL(window.parent.location);
-  url.searchParams.set('entered','true');
-  window.parent.location.href=url.toString();
-}
-</script>
 """.replace("LOGO_PLACEHOLDER", logo_tag)
 
+    # Dark background for Streamlit page
     st.markdown("""
     <style>
     header[data-testid="stHeader"]{display:none!important}
@@ -243,10 +243,42 @@ function enterApp(){
     footer{display:none!important}
     div.block-container{padding:0!important;max-width:100%!important}
     section[data-testid="stSidebar"]{display:none!important}
+    .stApp{background:#0f1a24!important}
+    /* Style the Streamlit button to match nautical theme */
+    div.stButton > button {
+        background: transparent !important;
+        border: 1px solid #c5993e !important;
+        color: #c5993e !important;
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 3px !important;
+        text-transform: uppercase !important;
+        padding: 14px 40px !important;
+        border-radius: 0 !important;
+        margin: 0 auto !important;
+        display: block !important;
+        transition: all 0.3s ease !important;
+        width: auto !important;
+    }
+    div.stButton > button:hover {
+        background: #c5993e !important;
+        color: #1a1410 !important;
+    }
+    div.stButton {
+        text-align: center;
+        margin-top: -40px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-    components.html(landing_html, height=800, scrolling=False)
+    components.html(landing_html, height=700, scrolling=False)
+
+    # Real Streamlit button — this always works
+    col1, col2, col3 = st.columns([2, 1, 2])
+    with col2:
+        if st.button("EMBARK ON THE VOYAGE  →", use_container_width=True):
+            st.session_state.entered = True
+            st.rerun()
 
 
 # ============================================================
@@ -467,10 +499,6 @@ def show_app():
 # ROUTING
 # ============================================================
 def main():
-    params = st.query_params
-    if params.get('entered') == 'true':
-        st.session_state.entered = True
-
     if not st.session_state.entered:
         show_landing()
     else:
