@@ -71,6 +71,8 @@ st.set_page_config(page_title="ShipAdvisor", page_icon="\u2693", layout="wide", 
 
 if 'sel' not in st.session_state:
     st.session_state.sel = None
+if 'entered' not in st.session_state:
+    st.session_state.entered = False
 
 
 # ============================================================
@@ -414,7 +416,10 @@ def show_app():
 # ROUTING
 # ============================================================
 def main():
-    show_app()
+    if not st.session_state.entered:
+        show_landing()
+    else:
+        show_app()
 
 if __name__ == "__main__":
     main()
