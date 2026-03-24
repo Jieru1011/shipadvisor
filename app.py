@@ -78,17 +78,108 @@ if 'sel' not in st.session_state:
 # ============================================================
 def get_logo_base64():
     import glob
-    # Search common locations
     candidates = ['./logo.png', './Logo.png', './LOGO.png',
                   './shipadvisor_results/logo.png', './assets/logo.png',
                   './images/logo.png']
-    # Also search for any png with 'logo' in name
     candidates += glob.glob('./*logo*.*') + glob.glob('./*Logo*.*') + glob.glob('./*LOGO*.*')
     for p in candidates:
         if os.path.exists(p) and p.lower().endswith(('.png', '.jpg', '.jpeg')):
             with open(p, 'rb') as f:
                 return base64.b64encode(f.read()).decode()
     return None
+
+
+# ============================================================
+# LANDING PAGE (pure Streamlit, no iframe)
+# ============================================================
+def show_landing():
+    logo_b64 = get_logo_base64()
+    logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="width:170px;height:auto;border-radius:12px;filter:drop-shadow(0 4px 24px rgba(0,0,0,0.5));animation:fU 1s 0.3s ease forwards;opacity:0;margin-bottom:1rem">' if logo_b64 else ''
+
+    st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+    header[data-testid="stHeader"]{display:none!important}
+    div[data-testid="stToolbar"]{display:none!important}
+    div[data-testid="stDecoration"]{display:none!important}
+    #MainMenu{display:none!important}
+    footer{display:none!important}
+    section[data-testid="stSidebar"]{display:none!important}
+    .stApp{
+        background:linear-gradient(180deg, #0d1117 0%, #1a2332 35%, #1b3a4b 65%, #2d6a7a 100%)!important;
+        overflow:hidden;
+    }
+    div.block-container{
+        display:flex!important; flex-direction:column!important;
+        align-items:center!important; justify-content:center!important;
+        min-height:100vh; padding:2rem!important; max-width:100%!important;
+    }
+    @keyframes fU{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes twinkle{0%{opacity:0.5}100%{opacity:1}}
+
+    /* Stars overlay */
+    .stApp::before{
+        content:''; position:fixed; top:0; left:0; right:0; height:45%; z-index:0; pointer-events:none;
+        background:
+            radial-gradient(1px 1px at 8% 12%, rgba(255,255,255,0.7) 50%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 22% 25%, rgba(255,255,255,0.5) 50%, transparent 100%),
+            radial-gradient(1px 1px at 35% 8%, rgba(255,255,255,0.6) 50%, transparent 100%),
+            radial-gradient(1px 1px at 52% 18%, rgba(255,255,255,0.4) 50%, transparent 100%),
+            radial-gradient(1.5px 1.5px at 67% 22%, rgba(255,255,255,0.7) 50%, transparent 100%),
+            radial-gradient(1px 1px at 78% 10%, rgba(255,255,255,0.5) 50%, transparent 100%);
+        animation:twinkle 4s ease-in-out infinite alternate;
+    }
+
+    /* Embark button styling */
+    div.stButton > button {
+        background: transparent !important;
+        border: 1px solid #c5993e !important;
+        color: #c5993e !important;
+        font-family: 'DM Sans', sans-serif !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 3px !important;
+        text-transform: uppercase !important;
+        padding: 14px 40px !important;
+        border-radius: 0 !important;
+        transition: all 0.4s ease !important;
+        animation: fU 1s 1.2s ease forwards;
+        opacity: 0;
+    }
+    div.stButton > button:hover {
+        background: #c5993e !important;
+        color: #1a1410 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown(f'''
+    <div style="text-align:center;position:relative;z-index:1">
+        {logo_html}
+        <h1 style="font-family:Playfair Display,serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;color:#faf6ee;line-height:1.15;opacity:0;animation:fU 1s 0.6s ease forwards">
+            Are You Ready to <em style="font-style:italic;color:#d4b06a;font-weight:400">Set Sail?</em>
+        </h1>
+        <p style="font-family:Cormorant Garamond,serif;font-size:clamp(1rem,2vw,1.3rem);font-weight:300;font-style:italic;color:rgba(244,239,230,0.6);max-width:540px;line-height:1.6;opacity:0;animation:fU 1s 0.8s ease forwards;margin:0.8rem auto 0">
+            Hop aboard and explore the Mediterranean through the eyes of 18th &amp; 19th century travellers
+            &mdash; their sketches, sentiments, and sea routes, all in one place.
+        </p>
+        <div style="display:flex;gap:2.5rem;justify-content:center;margin-top:1.6rem;opacity:0;animation:fU 1s 1s ease forwards">
+            <div style="text-align:center"><div style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:700;color:#c5993e">140+</div><div style="font-family:DM Sans,sans-serif;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(244,239,230,0.4);margin-top:2px">Travelogues</div></div>
+            <div style="text-align:center"><div style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:700;color:#c5993e">200+</div><div style="font-family:DM Sans,sans-serif;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(244,239,230,0.4);margin-top:2px">Routes</div></div>
+            <div style="text-align:center"><div style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:700;color:#c5993e">700+</div><div style="font-family:DM Sans,sans-serif;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(244,239,230,0.4);margin-top:2px">Illustrations</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin:1.5rem auto 0;opacity:0;animation:fU 1s 1.1s ease forwards">
+            <span style="width:50px;height:1px;background:#c5993e;opacity:0.3;display:inline-block"></span>
+            <span style="width:5px;height:5px;background:#c5993e;transform:rotate(45deg);opacity:0.5;display:inline-block"></span>
+            <span style="width:50px;height:1px;background:#c5993e;opacity:0.3;display:inline-block"></span>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([2, 1, 2])
+    with col2:
+        if st.button("EMBARK ON THE VOYAGE  →", use_container_width=True):
+            st.session_state.entered = True
+            st.rerun()
 
 
 # ============================================================
