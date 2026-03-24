@@ -128,7 +128,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
 .sea-floor{position:absolute;bottom:0;left:0;right:0;height:30%;overflow:hidden}
 .sea-floor svg{position:absolute;bottom:0;width:100%;height:100%}
 .big-ship{
-  position:absolute;bottom:19%;z-index:6;opacity:0;
+  position:absolute;bottom:10%;z-index:6;opacity:0;
   animation:bsA 2s 1s ease forwards, bsS 28s 1s linear infinite;
 }
 @keyframes bsA{to{opacity:0.75}}
@@ -144,9 +144,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
   100%{left:105%;transform:translateY(0) rotate(0deg)}
 }
 .ds{position:absolute;z-index:3;opacity:0}
-.ds1{bottom:27%;left:65%;animation:da1 2s 2.5s ease forwards,db1 6s 2.5s ease-in-out infinite}
-.ds2{bottom:29%;left:30%;animation:da2 2s 3s ease forwards,db2 7s 3s ease-in-out infinite}
-.ds3{bottom:26%;left:80%;animation:da3 2s 3.5s ease forwards,db3 8s 3.5s ease-in-out infinite}
+.ds1{bottom:18%;left:65%;animation:da1 2s 2.5s ease forwards,db1 6s 2.5s ease-in-out infinite}
+.ds2{bottom:20%;left:30%;animation:da2 2s 3s ease forwards,db2 7s 3s ease-in-out infinite}
+.ds3{bottom:17%;left:80%;animation:da3 2s 3.5s ease forwards,db3 8s 3.5s ease-in-out infinite}
 @keyframes da1{to{opacity:0.2}} @keyframes da2{to{opacity:0.15}} @keyframes da3{to{opacity:0.12}}
 @keyframes db1{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @keyframes db2{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
@@ -288,16 +288,14 @@ def inject_app_styles():
     st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Text:wght@400;600;700&family=EB+Garamond:wght@400;500;600&display=swap');
-    .stApp {{ font-family:'Crimson Text','Georgia',serif; background-color:{C['bg']}; }}
+    .stApp {{ font-family:'Crimson Text','Georgia',serif; background-color:#f0ebe3; }}
     h1,h2,h3 {{ font-family:'Playfair Display',serif!important; color:{C['ink']}!important; }}
-    .main-title {{ font-family:'Playfair Display',serif; font-size:2.8rem; font-weight:700; color:{C['ink']}; margin-bottom:0; }}
-    .subtitle {{ font-family:'EB Garamond',serif; font-size:1.15rem; color:{C['ink_light']}; font-style:italic; margin-bottom:1.5rem; }}
-    .ornament {{ text-align:center; color:{C['gold']}; font-size:1.2rem; letter-spacing:0.5em; margin:0.5rem 0 1.5rem 0; }}
-    .metric-card {{ background:{C['bg_dark']}; border-radius:4px; padding:1rem; text-align:center; border:1px solid rgba(139,111,71,0.2); }}
-    .metric-number {{ font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:{C['ink']}; }}
-    .metric-label {{ font-family:'EB Garamond',serif; font-size:0.85rem; color:{C['gold']}; text-transform:uppercase; letter-spacing:2px; }}
+    .main-title {{ font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:{C['ink']}; margin-bottom:0; }}
+    .subtitle {{ font-family:'EB Garamond',serif; font-size:1rem; color:{C['ink_light']}; font-style:italic; margin-bottom:1rem; }}
     .med-badge {{ display:inline-block; padding:2px 8px; border-radius:3px; font-size:0.7rem; background:rgba(42,111,151,0.12); color:{C['sea']}; border:1px solid rgba(42,111,151,0.25); }}
     .tag {{ display:inline-block; padding:3px 10px; border-radius:3px; font-size:0.75rem; margin:2px; font-family:'EB Garamond',serif; }}
+    /* Subtle top border matching landing gold */
+    div[data-testid="stTabs"] > div:first-child {{ border-bottom: 1px solid rgba(139,111,71,0.15); }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -423,13 +421,13 @@ def show_app():
 
     logo_b64 = get_logo_base64()
     if logo_b64:
-        hdr_l, hdr_m, hdr_r = st.columns([1, 6, 1])
-        with hdr_l: st.image(f"data:image/png;base64,{logo_b64}", width=60)
+        hdr_l, hdr_m = st.columns([1, 10])
+        with hdr_l: st.image(f"data:image/png;base64,{logo_b64}", width=45)
         with hdr_m:
             st.markdown('<p class="main-title">ShipAdvisor</p>', unsafe_allow_html=True)
             st.markdown('<p class="subtitle">Navigating Mediterranean travel routes in early modern travelogues</p>', unsafe_allow_html=True)
     else:
-        st.markdown('<p class="main-title">ShipAdvisor</p>', unsafe_allow_html=True)
+        st.markdown('<p class="main-title">⚓ ShipAdvisor</p>', unsafe_allow_html=True)
         st.markdown('<p class="subtitle">Navigating Mediterranean travel routes in early modern travelogues</p>', unsafe_allow_html=True)
 
     st.markdown("")
