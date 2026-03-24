@@ -257,7 +257,7 @@ def main():
     if 'sel' not in st.session_state:
         st.session_state.sel = None
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Statistics", "Browse Illustrations", "Route Explorer", "Sentiment Map"])
+    tab1, tab4, tab2, tab3 = st.tabs(["Statistics", "Sentiment Map", "Browse Illustrations", "Route Explorer"])
 
     # ================================================================
     # TAB 3: ROUTE EXPLORER
