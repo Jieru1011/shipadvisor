@@ -125,10 +125,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
   animation:twinkle 4s ease-in-out infinite alternate;
 }
 @keyframes twinkle{0%{opacity:0.5}100%{opacity:1}}
-.sea-floor{position:absolute;bottom:0;left:0;right:0;height:30%;overflow:hidden}
+.sea-floor{position:absolute;bottom:0;left:0;right:0;height:45%;overflow:hidden}
 .sea-floor svg{position:absolute;bottom:0;width:100%;height:100%}
 .big-ship{
-  position:absolute;bottom:10%;z-index:6;opacity:0;
+  position:absolute;bottom:15%;z-index:6;opacity:0;
   animation:bsA 2s 1s ease forwards, bsS 28s 1s linear infinite;
 }
 @keyframes bsA{to{opacity:0.75}}
@@ -144,9 +144,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
   100%{left:105%;transform:translateY(0) rotate(0deg)}
 }
 .ds{position:absolute;z-index:3;opacity:0}
-.ds1{bottom:18%;left:65%;animation:da1 2s 2.5s ease forwards,db1 6s 2.5s ease-in-out infinite}
-.ds2{bottom:20%;left:30%;animation:da2 2s 3s ease forwards,db2 7s 3s ease-in-out infinite}
-.ds3{bottom:17%;left:80%;animation:da3 2s 3.5s ease forwards,db3 8s 3.5s ease-in-out infinite}
+.ds1{bottom:24%;left:65%;animation:da1 2s 2.5s ease forwards,db1 6s 2.5s ease-in-out infinite}
+.ds2{bottom:26%;left:30%;animation:da2 2s 3s ease forwards,db2 7s 3s ease-in-out infinite}
+.ds3{bottom:23%;left:80%;animation:da3 2s 3.5s ease forwards,db3 8s 3.5s ease-in-out infinite}
 @keyframes da1{to{opacity:0.2}} @keyframes da2{to{opacity:0.15}} @keyframes da3{to{opacity:0.12}}
 @keyframes db1{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @keyframes db2{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
@@ -236,6 +236,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
     # Dark background for Streamlit page
     st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
     header[data-testid="stHeader"]{display:none!important}
     div[data-testid="stToolbar"]{display:none!important}
     div[data-testid="stDecoration"]{display:none!important}
@@ -243,22 +244,21 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
     footer{display:none!important}
     div.block-container{padding:0!important;max-width:100%!important}
     section[data-testid="stSidebar"]{display:none!important}
-    .stApp{background:#0f1a24!important}
+    .stApp{background:#162a38!important}
+    /* Make iframe seamless */
+    iframe{border:none!important}
     /* Style the Streamlit button to match nautical theme */
     div.stButton > button {
         background: transparent !important;
         border: 1px solid #c5993e !important;
         color: #c5993e !important;
         font-family: 'DM Sans', sans-serif !important;
-        font-size: 0.85rem !important;
+        font-size: 0.82rem !important;
         letter-spacing: 3px !important;
         text-transform: uppercase !important;
-        padding: 14px 40px !important;
+        padding: 13px 36px !important;
         border-radius: 0 !important;
-        margin: 0 auto !important;
-        display: block !important;
         transition: all 0.3s ease !important;
-        width: auto !important;
     }
     div.stButton > button:hover {
         background: #c5993e !important;
@@ -266,12 +266,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
     }
     div.stButton {
         text-align: center;
-        margin-top: -40px;
+        margin-top: -20px;
+        padding-bottom: 2rem;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    components.html(landing_html, height=700, scrolling=False)
+    components.html(landing_html, height=660, scrolling=False)
 
     # Real Streamlit button — this always works
     col1, col2, col3 = st.columns([2, 1, 2])
@@ -285,17 +286,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
 # APP STYLES
 # ============================================================
 def inject_app_styles():
-    st.markdown(f"""
+    st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Text:wght@400;600;700&family=EB+Garamond:wght@400;500;600&display=swap');
-    .stApp {{ font-family:'Crimson Text','Georgia',serif; background-color:#f0ebe3; }}
-    h1,h2,h3 {{ font-family:'Playfair Display',serif!important; color:{C['ink']}!important; }}
-    .main-title {{ font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; color:{C['ink']}; margin-bottom:0; }}
-    .subtitle {{ font-family:'EB Garamond',serif; font-size:1rem; color:{C['ink_light']}; font-style:italic; margin-bottom:1rem; }}
-    .med-badge {{ display:inline-block; padding:2px 8px; border-radius:3px; font-size:0.7rem; background:rgba(42,111,151,0.12); color:{C['sea']}; border:1px solid rgba(42,111,151,0.25); }}
-    .tag {{ display:inline-block; padding:3px 10px; border-radius:3px; font-size:0.75rem; margin:2px; font-family:'EB Garamond',serif; }}
-    /* Subtle top border matching landing gold */
-    div[data-testid="stTabs"] > div:first-child {{ border-bottom: 1px solid rgba(139,111,71,0.15); }}
+    .stApp { font-family:'Crimson Text','Georgia',serif; background: linear-gradient(180deg, #0f1a24 0%, #152736 100%); }
+    h1,h2,h3 { font-family:'Playfair Display',serif!important; color:#f0ebe3!important; }
+    p, span, label, .stMarkdown { color: #c8c0b4; }
+    .main-title { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:#f0ebe3; margin-bottom:0; }
+    .subtitle { font-family:'EB Garamond',serif; font-size:1rem; color:rgba(200,192,180,0.6); font-style:italic; margin-bottom:1rem; }
+    .med-badge { display:inline-block; padding:2px 8px; border-radius:3px; font-size:0.7rem; background:rgba(42,111,151,0.2); color:#5ba8c8; border:1px solid rgba(42,111,151,0.3); }
+    .tag { display:inline-block; padding:3px 10px; border-radius:3px; font-size:0.75rem; margin:2px; font-family:'EB Garamond',serif; }
+    /* Tab styling */
+    div[data-testid="stTabs"] button { color: rgba(200,192,180,0.5) !important; }
+    div[data-testid="stTabs"] button[aria-selected="true"] { color: #c5993e !important; border-bottom-color: #c5993e !important; }
+    div[data-testid="stTabs"] button:hover { color: rgba(200,192,180,0.8) !important; }
+    /* Selectbox, slider, inputs */
+    div[data-testid="stSelectbox"] label, div[data-testid="stSlider"] label,
+    div[data-testid="stCheckbox"] label, div[data-testid="stNumberInput"] label { color: #c8c0b4 !important; }
+    .stSelectbox > div > div { background: rgba(255,255,255,0.05) !important; border-color: rgba(197,153,62,0.2) !important; color: #f0ebe3 !important; }
+    /* Caption text */
+    .stCaption, small { color: rgba(200,192,180,0.5) !important; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -343,8 +353,9 @@ def get_stop_images(ills, ie, place):
     return out
 
 def base_layout(**kw):
-    d = dict(plot_bgcolor=C['bg'], paper_bgcolor=C['bg'], font=dict(family='Crimson Text,Georgia,serif', color=C['ink']),
-             title_font=dict(family='Playfair Display,serif', size=16, color=C['ink']))
+    d = dict(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+             font=dict(family='Crimson Text,Georgia,serif', color='#c8c0b4'),
+             title_font=dict(family='Playfair Display,serif', size=16, color='#f0ebe3'))
     d.update(kw); return d
 
 def draw_overview_map(routes):
@@ -437,7 +448,7 @@ def show_app():
     # TAB 1: SENTIMENT MAP
     with tab1:
         st.markdown("### Mediterranean Sentiment Map")
-        st.markdown(f'<p style="font-family:EB Garamond,serif;color:{C["ink_light"]};font-style:italic">Sentiment analysis of Mediterranean locations based on travelogue texts</p>', unsafe_allow_html=True)
+        st.markdown('<p style="font-family:EB Garamond,serif;color:rgba(200,192,180,0.5);font-style:italic">Sentiment analysis of Mediterranean locations based on travelogue texts</p>', unsafe_allow_html=True)
         map_path = "mediterranean_sentiment_map_offline.html"
         if os.path.exists(map_path):
             with open(map_path, "r", encoding="utf-8") as f:
@@ -485,7 +496,7 @@ def show_app():
                 with cols[shown % 6]:
                     st.image(ip, use_container_width=True)
                     tcl = TYPE_COLORS.get(ill['illustration_type'], C['slate'])
-                    st.markdown(f'<div style="font-size:11px;text-align:center;margin-top:-8px"><span style="color:{tcl};font-weight:600">{ill["illustration_type"]}</span><br><span style="color:{C["ink_light"]}">{ill["nearest_place"]} p.{int(ill["page"])}</span><br><span style="color:{C["ink_light"]};font-size:10px">{str(ill["book_title"])[:35]}</span></div>', unsafe_allow_html=True)
+                    st.markdown(f'<div style="font-size:11px;text-align:center;margin-top:-8px"><span style="color:{tcl};font-weight:600">{ill["illustration_type"]}</span><br><span style="color:rgba(200,192,180,0.6)">{ill["nearest_place"]} p.{int(ill["page"])}</span><br><span style="color:rgba(200,192,180,0.4);font-size:10px">{str(ill["book_title"])[:35]}</span></div>', unsafe_allow_html=True)
                     st.markdown("")
                 shown += 1
             if shown == 0: st.info("No images found for current filter.")
