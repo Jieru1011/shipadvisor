@@ -430,17 +430,17 @@ def show_app():
         st.error("No data. Place shipadvisor_results/ next to app.py."); return
 
     logo_b64 = get_logo_base64()
-    if logo_b64:
-        hdr_l, hdr_m = st.columns([1, 10])
-        with hdr_l: st.image(f"data:image/png;base64,{logo_b64}", width=45)
-        with hdr_m:
-            st.markdown('<p class="main-title">ShipAdvisor</p>', unsafe_allow_html=True)
-            st.markdown('<p class="subtitle">Navigating Mediterranean travel routes in early modern travelogues</p>', unsafe_allow_html=True)
-    else:
-        st.markdown('<p class="main-title">⚓ ShipAdvisor</p>', unsafe_allow_html=True)
-        st.markdown('<p class="subtitle">Navigating Mediterranean travel routes in early modern travelogues</p>', unsafe_allow_html=True)
+    logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height:55px;border-radius:8px;margin-right:16px">' if logo_b64 else '<span style="font-size:2rem;margin-right:12px">⚓</span>'
 
-    st.markdown("")
+    st.markdown(f'''
+    <div style="display:flex;align-items:center;padding:0.8rem 0 1rem 0;border-bottom:1px solid rgba(197,153,62,0.15);margin-bottom:1rem">
+        {logo_html}
+        <div>
+            <div style="font-family:Playfair Display,serif;font-size:1.8rem;font-weight:700;color:#f0ebe3;line-height:1.2">ShipAdvisor</div>
+            <div style="font-family:EB Garamond,serif;font-size:0.95rem;color:rgba(197,153,62,0.6);font-style:italic;margin-top:2px">Know Before You Row &mdash; Navigating Mediterranean travel routes in early modern travelogues</div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
 
     tab1, tab2 = st.tabs(["Sentiment Map", "Browse Illustrations"])
 
