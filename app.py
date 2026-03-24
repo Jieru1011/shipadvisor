@@ -229,14 +229,20 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
       <div class="stt"><div class="sn">700+</div><div class="sl">Illustrations</div></div>
     </div>
     <div class="orn"><span class="ln"></span><span class="dm"></span><span class="ln"></span></div>
+    <button class="eb" onclick="enterApp()"><span>Embark on the Voyage</span><span class="ar">&rarr;</span></button>
   </div>
 </div>
+<script>
+function enterApp(){
+  var url=new URL(window.parent.location);
+  url.searchParams.set('entered','true');
+  window.parent.location.href=url.toString();
+}
+</script>
 """.replace("LOGO_PLACEHOLDER", logo_tag)
 
-    # Dark background for Streamlit page
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap');
     header[data-testid="stHeader"]{display:none!important}
     div[data-testid="stToolbar"]{display:none!important}
     div[data-testid="stDecoration"]{display:none!important}
@@ -244,42 +250,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
     footer{display:none!important}
     div.block-container{padding:0!important;max-width:100%!important}
     section[data-testid="stSidebar"]{display:none!important}
-    .stApp{background:#162a38!important}
-    /* Make iframe seamless */
+    .stApp{background:#1b3a4b!important}
     iframe{border:none!important}
-    /* Style the Streamlit button to match nautical theme */
-    div.stButton > button {
-        background: transparent !important;
-        border: 1px solid #c5993e !important;
-        color: #c5993e !important;
-        font-family: 'DM Sans', sans-serif !important;
-        font-size: 0.82rem !important;
-        letter-spacing: 3px !important;
-        text-transform: uppercase !important;
-        padding: 13px 36px !important;
-        border-radius: 0 !important;
-        transition: all 0.3s ease !important;
-    }
-    div.stButton > button:hover {
-        background: #c5993e !important;
-        color: #1a1410 !important;
-    }
-    div.stButton {
-        text-align: center;
-        margin-top: -20px;
-        padding-bottom: 2rem;
-    }
     </style>
     """, unsafe_allow_html=True)
 
-    components.html(landing_html, height=660, scrolling=False)
-
-    # Real Streamlit button — this always works
-    col1, col2, col3 = st.columns([2, 1, 2])
-    with col2:
-        if st.button("EMBARK ON THE VOYAGE  →", use_container_width=True):
-            st.session_state.entered = True
-            st.rerun()
+    components.html(landing_html, height=900, scrolling=False)
 
 
 # ============================================================
