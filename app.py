@@ -165,8 +165,10 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
     footer{display:none!important}
     section[data-testid="stSidebar"]{display:none!important}
     div.block-container{padding:0!important;max-width:100%!important}
-    .stApp{background:#1b3a4b!important}
+    .stApp{background:#2d6a7a!important}
     iframe{border:none!important}
+    /* Hide all gap between iframe and button */
+    .stElementContainer{margin:0!important;padding:0!important}
     div.stButton > button{
         background:transparent!important;border:1px solid #c5993e!important;
         color:#c5993e!important;font-family:DM Sans,sans-serif!important;
@@ -175,11 +177,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0d1117}
         border-radius:0!important;transition:all 0.4s ease!important;
     }
     div.stButton > button:hover{background:#c5993e!important;color:#1a1410!important}
-    div.stButton{text-align:center;margin-top:-25px}
+    div.stButton{text-align:center;margin-top:-35px}
     </style>
     """, unsafe_allow_html=True)
 
-    components.html(landing_html, height=780, scrolling=False)
+    components.html(landing_html, height=850, scrolling=False)
 
     col1, col2, col3 = st.columns([2, 1, 2])
     with col2:
