@@ -1,8 +1,12 @@
-﻿sample_images/
+shipadvisor_images/
+shipadvisor_images_new/
+.venv/
+__pycache__/
+*.pyc
+
+embeddings.npz
+sample_images/
 sample_ocr/
+shipadvisor_images.tar.gz
 trial_output/
 *.npz
-__pycache__/
-.streamlit/
-.venv/
-*.tar.gz

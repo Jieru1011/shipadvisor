@@ -1,4 +1,3 @@
-
 """
 ShipAdvisor — Mediterranean Travel Route Explorer
 Usage:  python -m streamlit run app.py
@@ -14,7 +13,47 @@ RESULTS_DIR = './shipadvisor_results'
 ROUTES_FILE = os.path.join(RESULTS_DIR, 'routes.csv')
 ILLUSTRATIONS_FILE = os.path.join(RESULTS_DIR, 'route_illustrations.csv')
 CLASSIFICATIONS_FILE = os.path.join(RESULTS_DIR, 'classifications.csv')
+BOOKS_FILE = os.path.join(RESULTS_DIR, 'mediterranean_books.csv')
 IMAGE_DIRS = ['./shipadvisor_images', './travelogues_raw']
+
+# ============================================================
+# SUBJECT → DESTINATION MAPPING
+# Maps nearest_place values to keywords found in the Subject field.
+# Used to filter out illustrations from books whose Subject does
+# not match the selected location (e.g. an Africa book that
+# mentions Italy in passing should not show up under "Italy").
+# ============================================================
+PLACE_SUBJECT_KEYWORDS = {
+    # Based on include_terms from the pipeline and actual <plaats> values
+    # in mediterranean_books.csv Subject field (Dutch library catalogue)
+    'Italy':     ['italië'],
+    'France':    ['frankrijk'],
+    'Spain':     ['spanje'],
+    'Portugal':  ['portugal'],
+    'Greece':    [],                  # no books with Greece as primary Subject
+    'Turkey':    ['turkije'],
+    'Egypt':     ['egypte'],
+    'Palestine': ['palestina'],
+    'Syria':     ['syrië'],
+    'Lebanon':   [],                  # no books with Lebanon as primary Subject
+    'Algeria':   ['algerije', 'noord-afrikaanse staten', 'maghreb'],
+    'Tunisia':   ['tunesi', 'noord-afrikaanse staten', 'maghreb'],
+    'Morocco':   ['marokko', 'noord-afrikaanse staten', 'maghreb'],
+    'Libya':     ['libië', 'noord-afrikaanse staten', 'maghreb'],
+    'Cyprus':    [],                  # no books with Cyprus as primary Subject
+    'Malta':     [],                  # no books with Malta as primary Subject
+    'Croatia':   [],                  # no books with Croatia as primary Subject
+    # Non-Mediterranean places that appear in route matching
+    'Russia':    ['rusland'],
+    'India':     ['india', 'azië'],
+    'China':     ['china', 'azië'],
+    'Persia':    ['perzië'],
+    'England':   [],                  # transit country, no specific Subject
+    'Belgium':   [],                  # departure country
+    'Netherlands': [],
+    'Germany':   [],
+    'Austria':   [],
+}
 
 PLACE_COORDS = {
     'France': (46.6, 2.2), 'Italy': (42.5, 12.5), 'Spain': (40.4, -3.7),
@@ -31,7 +70,7 @@ PLACE_COORDS = {
 VISUAL_TYPES = {
     'map', 'nautical_chart', 'plan', 'harbour', 'seascape', 'ship',
     'coastal_city', 'landscape', 'architecture', 'portrait', 'animal',
-    'engraving', 'woodcut',
+    'engraving', 'woodcut', 'botanical',
 }
 MARITIME_TYPES = {'harbour', 'seascape', 'ship', 'coastal_city', 'nautical_chart'}
 
@@ -47,6 +86,7 @@ TYPE_COLORS = {
     'coastal_city': C['terra'], 'landscape': C['sage'],
     'architecture': C['plum'], 'portrait': C['red'],
     'engraving': C['gold'], 'woodcut': C['terra'], 'animal': C['olive'],
+    'botanical': C['sage'],
 }
 
 st.set_page_config(page_title="ShipAdvisor", page_icon="⚓", layout="wide", initial_sidebar_state="collapsed")
@@ -72,8 +112,38 @@ h1,h2,h3 {{ font-family:'Playfair Display',serif!important; color:{C['ink']}!imp
 def load_data():
     r = pd.read_csv(ROUTES_FILE) if os.path.exists(ROUTES_FILE) else None
     i = pd.read_csv(ILLUSTRATIONS_FILE) if os.path.exists(ILLUSTRATIONS_FILE) else None
-    c = pd.read_csv(CLASSIFICATIONS_FILE) if os.path.exists(CLASSIFICATIONS_FILE) else None
-    return r, i, c
+    # Skip classifications.csv — too large (84k rows), causes OOM.
+    # Statistics tab will derive stats from route_illustrations instead.
+    c = None
+    b = pd.read_csv(BOOKS_FILE) if os.path.exists(BOOKS_FILE) else None
+    return r, i, c, b
+
+
+def build_ie_subject_map(books_df):
+    """Build a dict: ie_folder → Subject string (lowercased)."""
+    m = {}
+    if books_df is None:
+        return m
+    for _, row in books_df.iterrows():
+        subj = str(row.get('Subject', '')).lower()
+        for ie in str(row.get('ie_folders', '')).replace(';', '|').split('|'):
+            ie = ie.strip()
+            if ie:
+                m[ie] = subj
+    return m
+
+
+def ie_matches_place(ie_folder, place, ie_subject_map):
+    """Check if a book's Subject field mentions the given place."""
+    keywords = PLACE_SUBJECT_KEYWORDS.get(place)
+    if keywords is None:
+        return True  # place not in mapping → don't filter
+    if len(keywords) == 0:
+        return True  # no dedicated books exist for this place → keep all
+    subj = ie_subject_map.get(ie_folder, '')
+    if not subj:
+        return True  # no Subject data → keep (safe default)
+    return any(kw in subj for kw in keywords)
 
 def find_image(p):
     for b in IMAGE_DIRS:
@@ -171,7 +241,8 @@ def draw_route_map(rd):
 
 # ---------------------------------------------------------------------------
 def main():
-    routes, illustrations, classifications = load_data()
+    routes, illustrations, classifications, books = load_data()
+    ie_subject_map = build_ie_subject_map(books)
     if routes is None:
         st.error("No data. Place `shipadvisor_results/` next to `app.py`."); return
 
@@ -329,18 +400,40 @@ def main():
         if illustrations is not None:
             med_vis = illustrations[(illustrations['is_med_location'] == True) & (illustrations['illustration_type'].isin(VISUAL_TYPES))].copy()
 
-            fc1, fc2 = st.columns(2)
+            fc1, fc2, fc3 = st.columns(3)
             with fc1:
                 all_types = sorted(med_vis['illustration_type'].unique())
                 sel_type = st.selectbox("Illustration type", ['All types'] + all_types)
             with fc2:
                 all_places = sorted(med_vis['nearest_place'].dropna().unique())
                 sel_place = st.selectbox("Location", ['All locations'] + all_places)
+            with fc3:
+                strict_filter = st.checkbox(
+                    "Strict: only books about this place",
+                    value=True,
+                    help="When enabled, only shows illustrations from books whose catalogue Subject matches the selected location. "
+                         "This filters out images from books that merely mention the place in passing (e.g. an Africa book mentioning Italy as a transit point)."
+                )
 
             if sel_type != 'All types':
                 med_vis = med_vis[med_vis['illustration_type'] == sel_type]
             if sel_place != 'All locations':
                 med_vis = med_vis[med_vis['nearest_place'] == sel_place]
+                # Apply Subject-based filtering when strict mode is on
+                if strict_filter and sel_place in PLACE_SUBJECT_KEYWORDS:
+                    kws = PLACE_SUBJECT_KEYWORDS[sel_place]
+                    if len(kws) == 0:
+                        st.warning(f"No books in the corpus are catalogued specifically under **{sel_place}** — strict filter has no effect. "
+                                   f"These illustrations come from books that mention {sel_place} in passing.")
+                    else:
+                        mask = med_vis['ie_folder'].apply(
+                            lambda ie: ie_matches_place(ie, sel_place, ie_subject_map)
+                        )
+                        n_before = len(med_vis)
+                        med_vis = med_vis[mask]
+                        n_filtered = n_before - len(med_vis)
+                        if n_filtered > 0:
+                            st.info(f"Strict filter removed {n_filtered} illustrations from books not catalogued under {sel_place}.")
 
             st.caption(f"{len(med_vis)} illustrations")
 
@@ -376,37 +469,50 @@ def main():
     # ================================================================
     with tab1:
         st.markdown("### Dataset Statistics")
+
+        # Filter to only real illustrations (exclude frontispice, title_page, etc.)
+        if illustrations is not None:
+            vis_only = illustrations[illustrations['illustration_type'].isin(VISUAL_TYPES)].copy()
+        else:
+            vis_only = None
+
         cl, cr = st.columns(2)
         with cl:
-            if illustrations is not None:
-                md = illustrations[illustrations['is_med_location'] == True]
+            if vis_only is not None:
+                md = vis_only[vis_only['is_med_location'] == True]
                 pc = md['nearest_place'].value_counts().head(15)
                 fig = px.bar(x=pc.values, y=pc.index, orientation='h', title='Top Mediterranean locations',
-                             color_discrete_sequence=[C['sea']])
+                             color_discrete_sequence=[C['sea']],
+                             labels={'x': 'Number of illustrations', 'y': 'Location'})
+                fig.update_traces(texttemplate='%{x}', textposition='outside')
                 fig.update_layout(**base_layout(height=450)); fig.update_yaxes(autorange="reversed")
                 st.plotly_chart(fig, use_container_width=True)
         with cr:
-            if classifications is not None:
-                dist = classifications[classifications['predicted_type'] != 'text_page']['predicted_type'].value_counts()
-                fig = px.bar(x=dist.values, y=dist.index, orientation='h', title='Illustration types (CLIP)',
-                             color_discrete_sequence=[C['gold']])
+            if vis_only is not None:
+                dist = vis_only['illustration_type'].value_counts()
+                fig = px.bar(x=dist.values, y=dist.index, orientation='h', title='Illustration types',
+                             color_discrete_sequence=[C['gold']],
+                             labels={'x': 'Count', 'y': 'Type'})
+                fig.update_traces(texttemplate='%{x}', textposition='outside')
                 fig.update_layout(**base_layout(height=450)); fig.update_yaxes(autorange="reversed")
                 st.plotly_chart(fig, use_container_width=True)
 
         cl2, cr2 = st.columns(2)
         with cl2:
-            if classifications is not None:
-                mc = classifications[classifications['predicted_type'].isin(MARITIME_TYPES)].shape[0]
-                nt = classifications[classifications['predicted_type'] != 'text_page'].shape[0]
+            if vis_only is not None:
+                mc = vis_only[vis_only['illustration_type'].isin(MARITIME_TYPES)].shape[0]
+                nt = len(vis_only)
                 fig = px.pie(values=[mc, nt-mc], names=['Maritime', 'Other'], title='Maritime vs other',
                              color_discrete_sequence=[C['sea'], C['terra']])
+                fig.update_traces(textinfo='label+value+percent')
                 fig.update_layout(paper_bgcolor=C['bg'], height=400,
                     font=dict(family='Crimson Text,serif', color=C['ink']),
                     title_font=dict(family='Playfair Display,serif', size=16, color=C['ink']))
                 st.plotly_chart(fig, use_container_width=True)
         with cr2:
             fig = px.histogram(routes, x='sea_pages', nbins=30, title='Sea pages per book',
-                               color_discrete_sequence=[C['indigo']])
+                               color_discrete_sequence=[C['indigo']],
+                               labels={'sea_pages': 'Sea pages', 'count': 'Books'})
             fig.update_layout(**base_layout(height=400, showlegend=False))
             st.plotly_chart(fig, use_container_width=True)
 
@@ -414,18 +520,23 @@ def main():
         with cl3:
             oc = routes['origin'].value_counts().head(10)
             fig = px.bar(x=oc.values, y=oc.index, orientation='h', title='Departure points',
-                         color_discrete_sequence=[C['sage']])
+                         color_discrete_sequence=[C['sage']],
+                         labels={'x': 'Count', 'y': 'Origin'})
+            fig.update_traces(texttemplate='%{x}', textposition='outside')
             fig.update_layout(**base_layout(height=400)); fig.update_yaxes(autorange="reversed")
             st.plotly_chart(fig, use_container_width=True)
         with cr3:
             dc = routes['destination'].value_counts().head(10)
             fig = px.bar(x=dc.values, y=dc.index, orientation='h', title='Final destinations',
-                         color_discrete_sequence=[C['red']])
+                         color_discrete_sequence=[C['red']],
+                         labels={'x': 'Count', 'y': 'Destination'})
+            fig.update_traces(texttemplate='%{x}', textposition='outside')
             fig.update_layout(**base_layout(height=400)); fig.update_yaxes(autorange="reversed")
             st.plotly_chart(fig, use_container_width=True)
 
         fig = px.histogram(routes, x='num_med_stops', nbins=20, title='Mediterranean stops per route',
-                           color_discrete_sequence=[C['sea']])
+                           color_discrete_sequence=[C['sea']],
+                           labels={'num_med_stops': 'Mediterranean stops', 'count': 'Routes'})
         fig.update_layout(**base_layout(height=350, showlegend=False))
         st.plotly_chart(fig, use_container_width=True)
 
