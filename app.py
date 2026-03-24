@@ -155,14 +155,17 @@ def show_landing():
     st.markdown(f'''
     <div style="text-align:center;position:relative;z-index:1">
         {logo_html}
-        <h1 style="font-family:Playfair Display,serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;color:#faf6ee;line-height:1.15;opacity:0;animation:fU 1s 0.6s ease forwards">
-            Are You Ready to <em style="font-style:italic;color:#d4b06a;font-weight:400">Set Sail?</em>
+        <h1 style="font-family:Playfair Display,serif;font-size:clamp(2.5rem,6vw,4.2rem);font-weight:700;color:#faf6ee;line-height:1.1;opacity:0;animation:fU 1s 0.6s ease forwards">
+            Voyage across the<br><em style="font-style:italic;color:#d4b06a;font-weight:400">Mediterranean</em>
         </h1>
-        <p style="font-family:Cormorant Garamond,serif;font-size:clamp(1rem,2vw,1.3rem);font-weight:300;font-style:italic;color:rgba(244,239,230,0.6);max-width:540px;line-height:1.6;opacity:0;animation:fU 1s 0.8s ease forwards;margin:0.8rem auto 0">
-            Hop aboard and explore the Mediterranean through the eyes of 18th &amp; 19th century travellers
-            &mdash; their sketches, sentiments, and sea routes, all in one place.
+        <p style="font-family:Playfair Display,serif;font-size:clamp(1.1rem,2.5vw,1.6rem);font-weight:400;font-style:italic;color:rgba(212,176,106,0.7);opacity:0;animation:fU 1s 0.85s ease forwards;margin-top:0.6rem">
+            Are you ready to set sail?
         </p>
-        <div style="display:flex;gap:2.5rem;justify-content:center;margin-top:1.6rem;opacity:0;animation:fU 1s 1s ease forwards">
+        <p style="font-family:Cormorant Garamond,serif;font-size:clamp(0.9rem,1.8vw,1.15rem);font-weight:300;font-style:italic;color:rgba(244,239,230,0.45);max-width:540px;line-height:1.6;opacity:0;animation:fU 1s 1s ease forwards;margin:0.8rem auto 0">
+            Discover 18th &amp; 19th century travelogues through sentiment analysis
+            and CLIP-powered illustration classification.
+        </p>
+        <div style="display:flex;gap:2.5rem;justify-content:center;margin-top:1.8rem;opacity:0;animation:fU 1s 1s ease forwards">
             <div style="text-align:center"><div style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:700;color:#c5993e">140+</div><div style="font-family:DM Sans,sans-serif;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(244,239,230,0.4);margin-top:2px">Travelogues</div></div>
             <div style="text-align:center"><div style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:700;color:#c5993e">200+</div><div style="font-family:DM Sans,sans-serif;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(244,239,230,0.4);margin-top:2px">Routes</div></div>
             <div style="text-align:center"><div style="font-family:Playfair Display,serif;font-size:1.5rem;font-weight:700;color:#c5993e">700+</div><div style="font-family:DM Sans,sans-serif;font-size:0.65rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(244,239,230,0.4);margin-top:2px">Illustrations</div></div>
